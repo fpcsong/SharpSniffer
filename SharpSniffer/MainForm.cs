@@ -86,6 +86,15 @@ namespace SharpSniffer
         {
             device.OnPacketArrival += Device_OnPacketArrival;
             //device.Open();
+            try
+            {
+                device.Filter = Common.filter;
+            }
+            catch(Exception)
+            {
+                MessageBox.Show("过滤器参数不合法");
+                return;
+            }
             device.Capture();
         }
         /// <summary>
