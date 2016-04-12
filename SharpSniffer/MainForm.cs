@@ -9,6 +9,7 @@ namespace SharpSniffer
     public partial class MainForm : Form
     {
         public BackgroundWorker backgroundWorker;
+        public BackgroundWorker backgroundWorkerWithFile;
         
         public MainForm()
         {
@@ -31,6 +32,13 @@ namespace SharpSniffer
             backgroundWorker.DoWork += BackgroundWorker_DoWork;
             backgroundWorker.WorkerSupportsCancellation = true;
             DoubleBuffered = true;
+            backgroundWorkerWithFile = new BackgroundWorker();
+            backgroundWorkerWithFile.DoWork += BackgroundWorkerWithFile_DoWork;
+        }
+
+        private void BackgroundWorkerWithFile_DoWork(object sender, DoWorkEventArgs e)
+        {
+            CaptureBackGround(Common.device);
         }
 
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -38,6 +46,7 @@ namespace SharpSniffer
             int deviceIndex = comboBox.SelectedIndex;
             ICaptureDevice device = Common.devices[deviceIndex];
             Common.device = device;
+            device.Open();
             CaptureBackGround(device);
         }
 
@@ -47,13 +56,15 @@ namespace SharpSniffer
             openFileDialog.RestoreDirectory = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-
+                Init();
+                Common.LoadCapFile(openFileDialog.FileName);
+                backgroundWorkerWithFile.RunWorkerAsync();
             }
         }
         private void  CaptureBackGround(ICaptureDevice device)
         {
             device.OnPacketArrival += Device_OnPacketArrival;
-            device.Open();
+            //device.Open();
             device.Capture();
         }
         /// <summary>
@@ -149,6 +160,7 @@ namespace SharpSniffer
         private void Stop_Click(object sender, EventArgs e)
         {
             backgroundWorker.Dispose();
+            if (comboBox.SelectedIndex < 0) return;
             Common.devices[comboBox.SelectedIndex].Close();
         }
 
@@ -162,6 +174,11 @@ namespace SharpSniffer
         {
             Filter filter = new Filter();
             filter.ShowDialog(this);
+        }
+        private void Init()
+        {
+            dataGridView.Rows.Clear();
+            Common.packetQueue.Clear();
         }
     }
 }

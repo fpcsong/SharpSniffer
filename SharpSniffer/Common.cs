@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharpPcap;
+using SharpPcap.LibPcap;
 using PacketDotNet;
 using System.Windows.Forms;
 using System.Threading;
@@ -44,6 +45,20 @@ namespace SharpSniffer
                     comboBox.Items.Add(name);
                     Thread.Sleep(100);
                 }
+            }
+        }
+        public static void LoadCapFile(string capFileName)
+        {
+            if (device != null) device.Close();
+            try
+            {
+                device = new CaptureFileReaderDevice(capFileName);
+                device.Open();
+            }
+            catch(Exception)
+            {
+                MessageBox.Show("Error while opening capFile");
+                return;
             }
         }
     }
