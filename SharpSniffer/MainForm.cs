@@ -34,7 +34,11 @@ namespace SharpSniffer
                 //空引用异常，不处理
             }
             cellDetails.Show();
-        }
+        }/// <summary>
+        /// 使用BackgroundWorker实现跨线程操作UI控件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MainForm_Load(object sender, EventArgs e)
         {
             Load load = new SharpSniffer.Load();
@@ -76,6 +80,10 @@ namespace SharpSniffer
                 backgroundWorkerWithFile.RunWorkerAsync();
             }
         }
+        /// <summary>
+        /// 开始抓包方法，此方法用于后台线程中
+        /// </summary>
+        /// <param name="device"></param>
         private void  CaptureBackGround(ICaptureDevice device)
         {
             device.OnPacketArrival += Device_OnPacketArrival;

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SharpPcap;
 using SharpPcap.LibPcap;
 using PacketDotNet;
@@ -22,11 +19,14 @@ namespace SharpSniffer
         public static List<RawCapture> queue = new List<RawCapture>();
         public static ComboBox comboBox = new ComboBox();
         public static CaptureDeviceList devices;
-        public static Thread captureThread;
         public static List<Packet> packetQueue = new List<Packet>();
         public static ICaptureDevice device;
         public static int cnt = 0;
         private static CaptureFileWriterDevice deviceWriteFile;
+        /// <summary>
+        /// 加载网卡，通过BackgroundWorker获取进度显示在启动界面的进度条上
+        /// </summary>
+        /// <param name="bw"></param>
         public static void LoadDevices(BackgroundWorker bw)
         {
             bw.ReportProgress(25);
@@ -48,6 +48,10 @@ namespace SharpSniffer
                 }
             }
         }
+        /// <summary>
+        /// 加载capFile，但是仅仅检测是否可以成功加载
+        /// </summary>
+        /// <param name="capFileName"></param>
         public static void LoadCapFile(string capFileName)
         {
             if (device != null) device.Close();
@@ -62,6 +66,11 @@ namespace SharpSniffer
                 return;
             }
         }
+
+        /// <summary>
+        /// 将缓存队列中的数据包写入cap文件
+        /// </summary>
+        /// <param name="capFileName"></param>
         public static void CreatecapFile(string capFileName)
         {
             deviceWriteFile = new CaptureFileWriterDevice(capFileName);
@@ -71,6 +80,10 @@ namespace SharpSniffer
             }
             deviceWriteFile.Close();
         }
+        /// <summary>
+        /// 双击协议名称单元格时新建窗口并显示数据包详细信息
+        /// </summary>
+        /// <param name="index"></param>
         public static void ShowDetail(int index)
         {
             RawCapture rawCapture = null;
