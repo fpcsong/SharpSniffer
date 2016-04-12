@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using SharpPcap;
@@ -43,6 +37,7 @@ namespace SharpSniffer
         {
             int deviceIndex = comboBox.SelectedIndex;
             ICaptureDevice device = Common.devices[deviceIndex];
+            Common.device = device;
             CaptureBackGround(device);
         }
 
@@ -93,7 +88,7 @@ namespace SharpSniffer
                 Common.packetQueue.Add(packet);
             }
             PacketDetials pd = new PacketDetials(packet);
-            DataGridViewRow dr = new DataGridViewRow();
+            //DataGridViewRow dr = new DataGridViewRow();
             if (pd.typeName == null) return;
             Interlocked.Increment(ref Common.cnt);
             para[0] = Common.cnt;
@@ -104,7 +99,6 @@ namespace SharpSniffer
                 para[3] = pd.ipPacket.DestinationAddress;
                 para[4] = pd.ethernetPacket.SourceHwAddress;
                 para[5] = pd.ethernetPacket.DestinationHwAddress;
-                
             }
             else if (pd.typeName== "ARP")
             {
@@ -156,6 +150,18 @@ namespace SharpSniffer
         {
             backgroundWorker.Dispose();
             Common.devices[comboBox.SelectedIndex].Close();
+        }
+
+        private void 缓存队列大小ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetQueueSize setQueueSize = new SetQueueSize();
+            setQueueSize.ShowDialog(this);
+        }
+
+        private void 过滤器参数ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Filter filter = new Filter();
+            filter.ShowDialog(this);
         }
     }
 }

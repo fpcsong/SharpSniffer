@@ -23,6 +23,7 @@ namespace SharpSniffer
         public static CaptureDeviceList devices;
         public static Thread captureThread;
         public static List<Packet> packetQueue = new List<Packet>();
+        public static ICaptureDevice device;
         public static int cnt = 0;
         public static void LoadDevices(BackgroundWorker bw)
         {
