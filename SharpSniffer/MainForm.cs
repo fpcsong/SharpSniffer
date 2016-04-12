@@ -15,6 +15,7 @@ namespace SharpSniffer
     public partial class MainForm : Form
     {
         public BackgroundWorker backgroundWorker;
+        
         public MainForm()
         {
             InitializeComponent();
@@ -35,6 +36,7 @@ namespace SharpSniffer
             backgroundWorker = new BackgroundWorker();
             backgroundWorker.DoWork += BackgroundWorker_DoWork;
             backgroundWorker.WorkerSupportsCancellation = true;
+            DoubleBuffered = true;
         }
 
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -60,52 +62,100 @@ namespace SharpSniffer
             device.Capture();
         }
         /// <summary>
-        /// 收到数据包之后一方面放在缓存队列里，另一方面显示在主界面
+        /// 收到数据包之后判断包类型
+        /// 一方面放在缓存队列里，另一方面显示在主界面
         /// 异步方式防止滚动条失效
-        /// 未解决问题：花屏
         /// </summary>
         /// <param name="packet"></param>
         public void PushPacket(Packet packet)
         {
+            object[] para = new object[6];
             if (Common.packetQueue.Count > Common.queueSize)
             {
-                Common.packetQueue.RemoveAt(0);
-                dataGridView.Rows.RemoveAt(0);
+                lock(Common.packetQueue)
+                {
+                    Common.packetQueue.RemoveRange(0,100);
+                }
+                if (this.InvokeRequired)
+                {
+                    lock(this)
+                    {
+                        this.BeginInvoke(new MethodInvoker(() =>
+                        {
+                            for (int i = 0; i < 100;i++) dataGridView.Rows.RemoveAt(0);
+                        }));
+                    }
+                }
+                //dataGridView.Rows.RemoveAt(0);
             }
-            Common.packetQueue.Add(packet);
+            lock(Common.packetQueue)
+            {
+                Common.packetQueue.Add(packet);
+            }
             PacketDetials pd = new PacketDetials(packet);
+            DataGridViewRow dr = new DataGridViewRow();
+            if (pd.typeName == null) return;
+            Interlocked.Increment(ref Common.cnt);
+            para[0] = Common.cnt;
+            para[1] = pd.typeName;
+            if (pd.typeName == "TCP" || pd.typeName == "UDP")
+            {
+                para[2] = pd.ipPacket.SourceAddress;
+                para[3] = pd.ipPacket.DestinationAddress;
+                para[4] = pd.ethernetPacket.SourceHwAddress;
+                para[5] = pd.ethernetPacket.DestinationHwAddress;
+                
+            }
+            else if (pd.typeName== "ARP")
+            {
+                para[2] = pd.arpPacket.SenderProtocolAddress;
+                para[3] = pd.arpPacket.TargetProtocolAddress;
+                para[4] = pd.arpPacket.SenderHardwareAddress;
+                para[5] = pd.arpPacket.TargetHardwareAddress;
+            }
+            else if (pd.typeName == "ICMPv4")
+            {
+                //para[2] = para[3] = para[4] = para[5] = null;
+                para[2] = pd.icmpv4Packet.BytesHighPerformance;
+                para[3] = pd.icmpv4Packet.PrintHex();
+                para[3] = pd.icmpv4Packet.ToString(StringOutputType.Normal);
+            }
+            else if (pd.typeName == "IGMPv2")
+            {
+                para[2] = pd.igmpv2Packet.BytesHighPerformance;
+                para[3] = pd.igmpv2Packet.PrintHex();
+                para[4] = pd.igmpv2Packet.ToString(StringOutputType.Normal);
+            }
             if (this.InvokeRequired)
             {
                 lock (this)
                 {
                     this.BeginInvoke(new MethodInvoker(() =>
                    {
-                       dataGridView.Rows.Add(++Common.cnt, packet.GetType(), pd.ipPacket.SourceAddress, pd.ipPacket.DestinationAddress, pd.ethernetPacket.SourceHwAddress, pd.ethernetPacket.DestinationHwAddress);
-                       dataGridView.Rows[dataGridView.Rows.Count - 1].DefaultCellStyle.BackColor = Color.FromName(packet.Color);
-                   }), null, null);
+                       dataGridView.Rows.Add(para);
+                       }), null, null);
                 }
             }
             else
             {
-                lock (this)
-                {
-                    dataGridView.Rows.Add(++Common.cnt, packet.GetType(), pd.ipPacket.SourceAddress, pd.ipPacket.DestinationAddress, pd.ethernetPacket.SourceHwAddress, pd.ethernetPacket.DestinationHwAddress);
-                    dataGridView.Rows[dataGridView.Rows.Count - 1].DefaultCellStyle.BackColor = Color.FromName(packet.Color);
-                }
+                dataGridView.Rows.Add(para);
             }
-            //dataGridView.Refresh();
-            //this.Refresh();
         }
         private void Device_OnPacketArrival(object sender, CaptureEventArgs e)
         {
             var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
             PushPacket(packet);
-            
         }
 
         private void Start_Click(object sender, EventArgs e)
         {
             backgroundWorker.RunWorkerAsync();
+        }
+
+        private void Stop_Click(object sender, EventArgs e)
+        {
+            backgroundWorker.Dispose();
+            Common.devices[comboBox.SelectedIndex].Close();
         }
     }
 }
