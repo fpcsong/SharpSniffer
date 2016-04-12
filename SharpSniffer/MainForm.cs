@@ -47,12 +47,8 @@ namespace SharpSniffer
             {
                 comboBox.Items.Add(item);
             }
-            backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += BackgroundWorker_DoWork;
-            backgroundWorker.WorkerSupportsCancellation = true;
             DoubleBuffered = true;
-            backgroundWorkerWithFile = new BackgroundWorker();
-            backgroundWorkerWithFile.DoWork += BackgroundWorkerWithFile_DoWork;
+            
         }
 
         private void BackgroundWorkerWithFile_DoWork(object sender, DoWorkEventArgs e)
@@ -77,6 +73,8 @@ namespace SharpSniffer
             {
                 Init();
                 Common.LoadCapFile(openFileDialog.FileName);
+                backgroundWorkerWithFile = new BackgroundWorker();
+                backgroundWorkerWithFile.DoWork += BackgroundWorkerWithFile_DoWork;
                 backgroundWorkerWithFile.RunWorkerAsync();
             }
         }
@@ -178,6 +176,11 @@ namespace SharpSniffer
 
         private void Start_Click(object sender, EventArgs e)
         {
+            if (Common.device != null) Common.device.Close();
+            Init();
+            backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += BackgroundWorker_DoWork;
+            backgroundWorker.WorkerSupportsCancellation = true;            
             backgroundWorker.RunWorkerAsync();
         }
 
@@ -213,6 +216,17 @@ namespace SharpSniffer
             {
                 Common.CreatecapFile(saveFileDialog.FileName);
             }
+        }
+
+        private void comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void 关于ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            About about = new About();
+            about.ShowDialog(this);
         }
     }
 }
