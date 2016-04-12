@@ -36,5 +36,10 @@ namespace SharpSniffer
         {
             this.Dispose();
         }
+
+        private void SetQueueSize_Load(object sender, EventArgs e)
+        {
+            textBox.Text = Common.queueSize.ToString();
+        }
     }
 }

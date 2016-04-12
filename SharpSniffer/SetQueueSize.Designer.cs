@@ -95,6 +95,7 @@
             this.Name = "SetQueueSize";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SetQueueSize";
+            this.Load += new System.EventHandler(this.SetQueueSize_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

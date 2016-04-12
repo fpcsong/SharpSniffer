@@ -92,15 +92,16 @@
             // 打开ToolStripMenuItem
             // 
             this.打开ToolStripMenuItem.Name = "打开ToolStripMenuItem";
-            this.打开ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.打开ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.打开ToolStripMenuItem.Text = "打开";
             this.打开ToolStripMenuItem.Click += new System.EventHandler(this.打开ToolStripMenuItem_Click);
             // 
             // 导出为capToolStripMenuItem
             // 
             this.导出为capToolStripMenuItem.Name = "导出为capToolStripMenuItem";
-            this.导出为capToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.导出为capToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.导出为capToolStripMenuItem.Text = "导出为.cap";
+            this.导出为capToolStripMenuItem.Click += new System.EventHandler(this.导出为capToolStripMenuItem_Click);
             // 
             // 设置ToolStripMenuItem
             // 
@@ -114,14 +115,14 @@
             // 缓存队列大小ToolStripMenuItem
             // 
             this.缓存队列大小ToolStripMenuItem.Name = "缓存队列大小ToolStripMenuItem";
-            this.缓存队列大小ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.缓存队列大小ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.缓存队列大小ToolStripMenuItem.Text = "缓存队列大小";
             this.缓存队列大小ToolStripMenuItem.Click += new System.EventHandler(this.缓存队列大小ToolStripMenuItem_Click);
             // 
             // 过滤器参数ToolStripMenuItem
             // 
             this.过滤器参数ToolStripMenuItem.Name = "过滤器参数ToolStripMenuItem";
-            this.过滤器参数ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.过滤器参数ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.过滤器参数ToolStripMenuItem.Text = "过滤器参数";
             this.过滤器参数ToolStripMenuItem.Click += new System.EventHandler(this.过滤器参数ToolStripMenuItem_Click);
             // 
@@ -246,7 +247,6 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SharpSniffer";
-            this.TopMost = true;
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.menu.ResumeLayout(false);
             this.menu.PerformLayout();

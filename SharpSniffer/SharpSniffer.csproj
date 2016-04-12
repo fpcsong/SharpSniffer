@@ -51,6 +51,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CellDetails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CellDetails.Designer.cs">
+      <DependentUpon>CellDetails.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common.cs" />
     <Compile Include="Filter.cs">
       <SubType>Form</SubType>
@@ -79,6 +85,9 @@
     <Compile Include="SetQueueSize.Designer.cs">
       <DependentUpon>SetQueueSize.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="CellDetails.resx">
+      <DependentUpon>CellDetails.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Filter.resx">
       <DependentUpon>Filter.cs</DependentUpon>
     </EmbeddedResource>

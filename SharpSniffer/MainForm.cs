@@ -18,7 +18,22 @@ namespace SharpSniffer
 
         private void dataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            
+            CellDetails cellDetails = new CellDetails();
+            try
+            {
+                if(dataGridView.CurrentCell.ColumnIndex == 1)
+                {
+                    Common.ShowDetail(dataGridView.CurrentCell.RowIndex);
+                    return;
+                }
+                cellDetails.MainMenuStrip.Enabled = false;
+                cellDetails.richTextBox.Text = dataGridView.CurrentCell.Value.ToString();
+            }
+            catch(Exception)
+            {
+                //空引用异常，不处理
+            }
+            cellDetails.Show();
         }
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -72,36 +87,38 @@ namespace SharpSniffer
         /// 一方面放在缓存队列里，另一方面显示在主界面
         /// 异步方式防止滚动条失效
         /// </summary>
-        /// <param name="packet"></param>
-        public void PushPacket(Packet packet)
+        /// <param name="rawcapture"></param>
+        public void PushPacket(RawCapture rawcapture)
         {
+            Packet packet = Packet.ParsePacket(rawcapture.LinkLayerType, rawcapture.Data);
             object[] para = new object[6];
-            if (Common.packetQueue.Count > Common.queueSize)
+            if (Common.queue.Count > Common.queueSize)
             {
-                lock(Common.packetQueue)
+                lock(Common.queue)
                 {
-                    Common.packetQueue.RemoveRange(0,100);
-                }
-                if (this.InvokeRequired)
-                {
-                    lock(this)
+                    Common.queue.RemoveRange(0,100);
+                    if (this.InvokeRequired)
                     {
-                        this.BeginInvoke(new MethodInvoker(() =>
+                        lock (this)
                         {
-                            for (int i = 0; i < 100;i++) dataGridView.Rows.RemoveAt(0);
-                        }));
+                            this.BeginInvoke(new MethodInvoker(() =>
+                            {
+                                for (int i = 0; i < 100; i++) dataGridView.Rows.RemoveAt(0);
+                            }));
+                        }
                     }
                 }
+                
                 //dataGridView.Rows.RemoveAt(0);
             }
-            lock(Common.packetQueue)
+            lock(Common.queue)
             {
-                Common.packetQueue.Add(packet);
+                Common.queue.Add(rawcapture);
+                Interlocked.Increment(ref Common.cnt);
             }
             PacketDetials pd = new PacketDetials(packet);
             //DataGridViewRow dr = new DataGridViewRow();
             if (pd.typeName == null) return;
-            Interlocked.Increment(ref Common.cnt);
             para[0] = Common.cnt;
             para[1] = pd.typeName;
             if (pd.typeName == "TCP" || pd.typeName == "UDP")
@@ -148,8 +165,7 @@ namespace SharpSniffer
         }
         private void Device_OnPacketArrival(object sender, CaptureEventArgs e)
         {
-            var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
-            PushPacket(packet);
+            PushPacket(e.Packet);
         }
 
         private void Start_Click(object sender, EventArgs e)
@@ -178,7 +194,17 @@ namespace SharpSniffer
         private void Init()
         {
             dataGridView.Rows.Clear();
-            Common.packetQueue.Clear();
+            Common.queue.Clear();
+        }
+
+        private void 导出为capToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.RestoreDirectory = true;
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                Common.CreatecapFile(saveFileDialog.FileName);
+            }
         }
     }
 }

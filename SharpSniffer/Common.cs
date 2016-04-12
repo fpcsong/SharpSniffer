@@ -26,6 +26,7 @@ namespace SharpSniffer
         public static List<Packet> packetQueue = new List<Packet>();
         public static ICaptureDevice device;
         public static int cnt = 0;
+        private static CaptureFileWriterDevice deviceWriteFile;
         public static void LoadDevices(BackgroundWorker bw)
         {
             bw.ReportProgress(25);
@@ -60,6 +61,37 @@ namespace SharpSniffer
                 MessageBox.Show("Error while opening capFile");
                 return;
             }
+        }
+        public static void CreatecapFile(string capFileName)
+        {
+            deviceWriteFile = new CaptureFileWriterDevice(capFileName);
+            for (int i = 0; i < queue.Count; i++)
+            {
+                deviceWriteFile.Write(queue[i]);
+            }
+            deviceWriteFile.Close();
+        }
+        public static void ShowDetail(int index)
+        {
+            RawCapture rawCapture = null;
+            try
+            {
+                rawCapture = queue[index];
+            }
+            catch(Exception)
+            {
+                MessageBox.Show("Error while displying details");
+                return;
+            }
+            Packet packet = Packet.ParsePacket(rawCapture.LinkLayerType, rawCapture.Data);
+            PacketDetials pd = new PacketDetials(packet);
+            CellDetails cellDetails = new CellDetails();
+            cellDetails.rawCapture = rawCapture;
+            if (pd.ethernetPacket != null)
+            {
+                cellDetails.richTextBox.Text = pd.ethernetPacket.ToString(StringOutputType.VerboseColored) + Environment.NewLine + pd.ethernetPacket.PrintHex();
+            }
+            cellDetails.Show();
         }
     }
 }
